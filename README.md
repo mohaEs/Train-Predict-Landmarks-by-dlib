@@ -24,7 +24,35 @@ my versions were:<br>
 My dataset contains images with size 256x256 and landmarks were localized on it.<br>
 first I need to create the xml file for training should be created based on the dlib template.<br>
 You can modify code which is on MATLAB for generating your own xml file:<br>
+it is supposed images are in a folder (path_train_png) and the landmarks are saved in another file (path_train_lm) as csv files with same file names.
+```
+DirPngs=dir(fullfile(path_train_png,'*.png'));
 
+fileID = fopen([path_train_png '4Dlib_training_images_with_landmarks.xml'],'w');   
+fprintf(fileID, "<?xml version='1.0' encoding='ISO-8859-1'?> \n");
+fprintf(fileID, "<?xml-stylesheet type='text/xsl' ?> \n");
+fprintf(fileID, "<dataset>\n");
+fprintf(fileID, "<name>Training landmarks</name>\n");
+fprintf(fileID, "<images>\n");
+
+for SampleCounter=1:length(DirPngs)
+  ImageFileName= DirPngs(SampleCounter).name;
+  LMs=csvread([path_train_lm ImageFileName(1:end-4) '.csv']);
+
+  fprintf(fileID, "\t <image file='%s'> \n", ImageFileName);
+  fprintf(fileID, "\t \t <box top='1' left='1' width='255' height='255'> \n", ImageFileName);
+  for lm_counter=1:length(Ind_landmarks)
+     fprintf(fileID, "\t \t \t <part name='%d' x='%d' y='%d'/> \n",lm_counter,LMs(lm_counter,1),LMs(lm_counter,2));
+  end
+
+  fprintf(fileID, "\t \t </box> \n");
+  fprintf(fileID, "\t </image> \n");
+%       type training_images_with_landmarks.xml
+end
+fprintf(fileID, "</images>\n");
+fprintf(fileID, "</dataset>\n");
+fclose(fileID);
+```
 
 The created xml file would be placed at the path_trainin_png folder. <br>
 Note that, the bounding box for all images are fixed around image which is one of my goal.<br>
